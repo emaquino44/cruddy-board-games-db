@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var ejsLayouts = require("express-ejs-layouts");
 var bodyParser = require('body-parser');
+var db = require("/models");
 
 var app = express();
 
@@ -23,10 +24,15 @@ app.get('/', function(req, res) {
     res.redirect('/games');
 });
 
-app.get('/games', function(req, res) {
-    var games = getGames();
 
-    res.render('games-index', { games: games });
+
+app.get('/games', function(req, res) {
+    db.game.findAll().then(function(games) {
+
+        res.render('games-index', { games: games });
+    }).catch(function(error) {
+        res.status(404).send(error);
+    });
 });
 
 app.get('/games/new', function(req, res) {
@@ -34,21 +40,33 @@ app.get('/games/new', function(req, res) {
 });
 
 app.post('/games', function(req, res) {
-    console.log(req.body);
-    var newGame = req.body;
+    db.user.findOrCreate({
+        where: {
+            name: name,
+            description: description
+        },
+        defaults: { age: 47 }
+    }).spread(function(games, ) {
+        console.log(user);
+    });
 
-    var games = getGames();
-    games.push(newGame);
-    saveGames(games);
 
-    res.redirect('/games');
+
+    // console.log(req.body);
+    // var newGame = req.body;
+
+    // var games = getGames();
+    // games.push(newGame);
+    // saveGames(games);
+
+    // res.redirect('/games');
 });
 
 // show page
 app.get('/game/:name', function(req, res) {
-    var nameOfTheGame = req.params.name;
-    var games = getGames();
-    var game = getGame(games, nameOfTheGame);
+    // var nameOfTheGame = req.params.name;
+    // var games = getGames();
+    // var game = getGame(games, nameOfTheGame);
 
     res.render('games-show', game);
 });
